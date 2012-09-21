@@ -15,36 +15,85 @@
 
 require 'gui/helpers'
 
+
 class GUI
-	import javax.swing.JFrame;
-	import javax.swing.JLabel;
+  import java.awt.BorderLayout
+  import java.awt.Dimension
+  
+  import javax.swing.JFrame
+  import javax.swing.BorderFactory
+  import javax.swing.JScrollPane
+  import javax.swing.JPanel
+  import javax.swing.JLabel
+  import javax.swing.JList
+  import javax.swing.GroupLayout
+  import javax.swing.JButton
+  import javax.swing.SwingConstants
+  import java.awt.FlowLayout
+  import javax.swing.BoxLayout
+  import javax.swing.Box
+  import javax.swing.JComboBox
+  import java.awt.Dimension
+  attr_reader :options, :profile
 
-	attr_reader :options, :profile
+  def initialize (options = {})
+    @options = options
+    @profile = options[:config] ? Torchat.new(options[:config]) : Torchat.profile(options[:profile])
+  end
+  
+  def start
+    @thread = Thread.new {
+      EM.run {
+        @profile.start {|s|
+        }
+      }
+    }
+    
+    
+    
+    
+    # @frame = JFrame.new('jtorchat')
+    # @frame.getContentPane().add(JLabel.new('this be jtorchat'))
+    # @frame.setDefaultCloseOperation(JFrame::EXIT_ON_CLOSE)
+    # @frame.pack
+    # @frame.set_visible(true);
+    initUI()
+    
+  end
+  
+  def initUI
+    @frame = JFrame.new("tor")
+   
+    @frame.setPreferredSize(Dimension.new(200, 300))
 
-	def initialize (options = {})
-		@options = options
-		@profile = options[:config] ? Torchat.new(options[:config]) : Torchat.profile(options[:profile])
-	end
+    basic = JPanel.new
+    basic.setLayout(BoxLayout.new( basic, BoxLayout::Y_AXIS))
+    bottom = JPanel.new
+    bottom.setLayout(BoxLayout.new(bottom, BoxLayout::X_AXIS))
+    bottom.setAlignmentX(0.5)
+    list = JList.new(["culetto","marcio","pieno"].to_java)
+    pane = JScrollPane.new
+    pane.getViewport.add(list)
+    pane.setPreferredSize(Dimension.new(200, 250))
+    basic.add(pane)
+    status = JComboBox.new(["Available","Away","Offline"].to_java)
 
-	def start
-		@thread = Thread.new {
-			EM.run {
-				profile.start
-			}
-		}
+    bottom.add(status)
+    basic.add(bottom)
 
-		@frame = JFrame.new('jtorchat')
-		@frame.getContentPane().add(JLabel.new('this be jtorchat'))
-		@frame.setDefaultCloseOperation(JFrame::EXIT_ON_CLOSE)
-		@frame.pack
-		@frame.set_visible(true);
-	end
-
-	def stop
-		profile.stop
-
-		EM.stop_event_loop
-
-		@thread.join
-	end
+    @frame.add(basic)
+    @frame.pack
+    
+    @frame.setDefaultCloseOperation(JFrame::EXIT_ON_CLOSE)
+    @frame.setLocationRelativeTo(nil)
+    @frame.setVisible(true)
+  end
+  
+  def stop
+    profile.stop
+    
+    EM.stop_event_loop
+    
+    @thread.join
+  end
 end
