@@ -17,24 +17,14 @@ require 'gui/helpers'
 
 
 class GUI
-
-  import javax.swing.JTabbedPane
-  import javax.swing.ImageIcon
-  import javax.swing.JLabel
-  import javax.swing.JPanel
-  import javax.swing.JFrame
-  import javax.swing.JComponent
-  import javax.swing.SwingUtilities
-  import javax.swing.UIManager
   import java.awt.BorderLayout
   import java.awt.Dimension
-  import java.awt.GridLayout
-  import java.awt.event.KeyEvent
-    import java.awt.BorderLayout
-  import java.awt.Dimension
   
+  import javax.swing.JFrame
   import javax.swing.BorderFactory
   import javax.swing.JScrollPane
+  import javax.swing.JPanel
+  import javax.swing.JLabel
   import javax.swing.JList
   import javax.swing.GroupLayout
   import javax.swing.JButton
@@ -43,13 +33,12 @@ class GUI
   import javax.swing.BoxLayout
   import javax.swing.Box
   import javax.swing.JComboBox
-
+  import java.awt.Dimension
   attr_reader :options, :profile
 
   def initialize (options = {})
     @options = options
     @profile = options[:config] ? Torchat.new(options[:config]) : Torchat.profile(options[:profile])
-    
   end
   
   def start
@@ -73,68 +62,33 @@ class GUI
   end
   
   def initUI
-    
+    @frame = JFrame.new("tor")
+   
+    @frame.setPreferredSize(Dimension.new(200, 300))
 
-    @panel = JPanel.new
-    @panel.setPreferredSize(Dimension.new(300,300))
-    @panel.setLayout(GridLayout.new(1,1))
-
-    
-    tabbedpane = JTabbedPane.new
-    
     basic = JPanel.new
     basic.setLayout(BoxLayout.new( basic, BoxLayout::Y_AXIS))
     bottom = JPanel.new
     bottom.setLayout(BoxLayout.new(bottom, BoxLayout::X_AXIS))
     bottom.setAlignmentX(0.5)
-    user_list = JList.new(["culetto","marcio","pieno"].to_java)
-
-    user_list.add_list_selection_listener do |e|
-      
-      sender = e.source
-      if not e.getValueIsAdjusting
-        flag = true;
-        0.upto(tabbedpane.getTabCount()-1) do |x|
-          
-          if(tabbedpane.getTitleAt(x) == sender.getSelectedValue)
-            tabbedpane.setSelectedIndex(x)
-            flag = false;
-            break;
-          end
-        end
-        if flag 
-          tabbedpane.addTab(sender.getSelectedValue,create_new_tab(sender.getSelectedValue))
-          tabbedpane.setSelectedIndex(tabbedpane.getTabCount()-1)
-        end
-      end
-    end
+    list = JList.new(["culetto","marcio","pieno"].to_java)
     pane = JScrollPane.new
-    pane.getViewport.add(user_list)
+    pane.getViewport.add(list)
     pane.setPreferredSize(Dimension.new(200, 250))
     basic.add(pane)
-    status = JComboBox.new(["Available","Busy","Offline"].to_java)
+    status = JComboBox.new(["Available","Away","Offline"].to_java)
     torc =   ImageComboBox.new
-   # @user_list.setCellRenderer(torc)
+    list.setCellRenderer(torc)
     status.setRenderer(torc)
     bottom.add(status)
     basic.add(bottom)
 
-    
-
-    tabbedpane.addTab("user list",nil,basic,"yoyo")
-
-    tabbedpane.setTabLayoutPolicy(JTabbedPane::SCROLL_TAB_LAYOUT)
-    @panel.add(tabbedpane)
-
-    @frame = JFrame.new("tor")
-    @frame.add(@panel)
+    @frame.add(basic)
     @frame.pack
-
-    @frame.setPreferredSize(Dimension.new(300, 300))
+    
     @frame.setDefaultCloseOperation(JFrame::EXIT_ON_CLOSE)
     @frame.setLocationRelativeTo(nil)
     @frame.setVisible(true)
-
   end
   
   def stop
@@ -144,15 +98,6 @@ class GUI
     
     @thread.join
   end
-
-
-  def create_new_tab(val)
-
-    ntab = JPanel.new
-    ntab.add(JLabel.new(val))
-    return ntab
-  end
-
 
   class ImageComboBox < javax.swing.JLabel
   include javax.swing.ListCellRenderer
@@ -166,20 +111,15 @@ class GUI
     
     def getListCellRendererComponent(list,value,index,isSelected,cellHasFocus)
       setText(value)
-     
-        case value.downcase
-        when "available"
-          
-          setIcon(ImageIcon.new(File.dirname(__FILE__)+"/../data/icons/user-online.png"))
-        when "busy"
-          setIcon(ImageIcon.new(File.dirname(__FILE__)+"/../data/icons/user-busy.png"))
-        when "offline"
-          setIcon(ImageIcon.new(File.dirname(__FILE__)+"/../data/icons/user-offline.png"))
-        else
-        end
-
-      self
+      case value.downcase
+      when "available"
+        setIcon(ImageIcon.new(URL.new(File.dirname(__FILE__)+"/../data/icons/user-online.png")))
+      when "busy"
+        setIcon(ImageIcon.new(URL.new(File.dirname(__FILE__)+"/../data/icons/user-busy.png")))
+      when "offline"
+        setIcon(ImageIcon.new(URL.new(File.dirname(__FILE__)+"/../data/icons/user-offline.png")))
+      end
+      return self
     end
   end
-
 end
