@@ -17,7 +17,7 @@ require 'gui/helpers'
 
 
 class GUI
-
+  import javax.swing.UIManager
   import javax.swing.JTabbedPane
   import javax.swing.ImageIcon
   import javax.swing.JLabel
@@ -49,6 +49,15 @@ class GUI
   def initialize (options = {})
     @options = options
     @profile = options[:config] ? Torchat.new(options[:config]) : Torchat.profile(options[:profile])
+    
+    UIManager.getInstalledLookAndFeels().each {|x|
+
+      if(x.getName() == "Nimbus")
+        puts "nimbus we have"
+        UIManager.setLookAndFeel(x.getClassName());
+        break
+      end
+    }
     
   end
   
